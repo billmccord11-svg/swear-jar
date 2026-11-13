@@ -168,6 +168,8 @@ const NAME = "(?:cunts?|bitch(?:es)?|assholes?|dicks?|pricks?|twats?)";
 
 const SWAPS = [
   // Phrases first (learned from her real messages)
+  // Stacked insults ("dumbass asshole") become one
+  ["(?:dumbass|dumb|stupid) ~(?:assholes?|cunts?|bitch(?:es)?|dicks?|pricks?|motherfuckers?|cocksuckers?|idiots?)", "goofball", "difficult person"],
   ["(through|in|into|on|over|across) (the|this|that|some) ~(?:shit|crap)", "$1 $2 mess", "$1 $2 mess"],
   ["you little ~(?:cocksuckers?|shits?|bastards?|fuckers?|cunts?|assholes?|bitch(?:es)?|pricks?|dicks?)", "you little rascal", ""],
   ["kick your (?:little |sorry |lazy |dumb |fat )*(?:shit ?|dumb ?|lazy ?|fat ?)?(?:ass|butt|behind) out", "kick your little behind out", "send you out"],
@@ -273,6 +275,8 @@ const MASK_GUESSES = [
 function unmask(text) {
   // Two-word masks that only make sense together ("c*** s*****")
   text = text.replace(/\b([Cc])\*{3}[ -]?s\*{5}(\*?)(?![\w*])/g, (_, c, plural) => c + "ocksucker" + (plural ? "s" : ""));
+  // "mother f*****" is always the m-f word, never "mother fucked"
+  text = text.replace(/\b([Mm])other[ -]?f(\*{5,6})(?![\w*])/g, (_, m, stars) => m + "otherfuck" + (stars.length === 5 ? "er" : "ing"));
   text = text.replace(/[A-Za-z]*\*+[A-Za-z*]*/g, tok => {
     const t = tok.toLowerCase();
     const hit = MASK_GUESSES.find(w =>
