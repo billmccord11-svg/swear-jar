@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- background -->
+  <rect width="512" height="512" rx="112" fill="#14213d"/>
+  <circle cx="256" cy="280" r="200" fill="#1f3159"/>
+
+  <!-- falling coin with motion lines -->
+  <g transform="rotate(-25 352 72)">
+    <ellipse cx="352" cy="72" rx="30" ry="30" fill="#f2c14e" stroke="#b07d12" stroke-width="6"/>
+    <text x="352" y="86" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="38" fill="#b07d12" text-anchor="middle">$</text>
+  </g>
+  <path d="M392 30 l22 -14 M400 58 l26 -6 M384 8 l14 -14" stroke="#fbf6ea" stroke-width="7" stroke-linecap="round" opacity=".8"/>
+
+  <!-- lid -->
+  <rect x="160" y="108" width="192" height="52" rx="16" fill="#e0a526" stroke="#b07d12" stroke-width="7"/>
+  <path d="M190 118 v32 M222 118 v32 M254 118 v32 M286 118 v32 M318 118 v32" stroke="#b07d12" stroke-width="5" opacity=".6"/>
+  <rect x="226" y="104" width="60" height="10" rx="5" fill="#14213d"/>
+
+  <!-- jar neck + body (glass) -->
+  <rect x="176" y="156" width="160" height="34" rx="10" fill="#bfe1f2" fill-opacity=".45" stroke="#fbf6ea" stroke-width="9"/>
+  <rect x="124" y="182" width="264" height="276" rx="62" fill="#bfe1f2" fill-opacity=".35" stroke="#fbf6ea" stroke-width="10"/>
+
+  <!-- coin pile inside -->
+  <g stroke="#b07d12" stroke-width="5" fill="#f2c14e">
+    <ellipse cx="190" cy="420" rx="34" ry="14"/>
+    <ellipse cx="256" cy="424" rx="34" ry="14"/>
+    <ellipse cx="322" cy="420" rx="34" ry="14"/>
+    <ellipse cx="222" cy="404" rx="34" ry="14"/>
+    <ellipse cx="290" cy="404" rx="34" ry="14"/>
+    <ellipse cx="256" cy="386" rx="34" ry="14"/>
+    <circle cx="176" cy="376" r="24"/>
+    <circle cx="338" cy="370" r="24"/>
+  </g>
+  <text x="176" y="387" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="30" fill="#b07d12" text-anchor="middle">$</text>
+  <text x="338" y="381" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="30" fill="#b07d12" text-anchor="middle">$</text>
+
+  <!-- label with grawlix -->
+  <rect x="146" y="224" width="220" height="104" rx="20" fill="#fbf6ea" stroke="#c0392b" stroke-width="7" transform="rotate(-4 256 276)"/>
+  <text x="256" y="298" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="60" fill="#c0392b" text-anchor="middle" transform="rotate(-4 256 276)">#@$%!</text>
+
+  <!-- glass shine -->
+  <rect x="146" y="200" width="16" height="190" rx="8" fill="#ffffff" opacity=".55"/>
+  <rect x="172" y="340" width="10" height="40" rx="5" fill="#ffffff" opacity=".4"/>
+</svg>
