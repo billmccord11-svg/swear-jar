@@ -66,6 +66,16 @@
   .btn-pr { background: var(--cream); color: var(--navy); }
   .btn-ghost { background: transparent; color: var(--cream); border: 2px solid var(--navy2); font-size: 14px; padding: 9px; font-weight: 600; }
   .btn-copy { background: var(--green); color: #fff; }
+  .mic {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    width: 100%; margin-top: 12px; padding: 20px 10px;
+    border-radius: 40px; background: #22a35a; color: #fff; font-size: 22px;
+    box-shadow: 0 6px 0 #17713e;
+  }
+  .mic .mic-ico { font-size: 30px; }
+  .mic.listening { background: var(--red); box-shadow: 0 6px 0 #8e2a1f; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+  .mic-note { text-align: center; font-size: 14px; opacity: .8; margin-top: 8px; min-height: 18px; }
   #result { display: none; margin-top: 16px; }
   .card {
     background: var(--navy2);
@@ -108,7 +118,9 @@
   </header>
 
   <label for="inp">Say it how you mean it 🎤</label>
-  <textarea id="inp" placeholder="Tap the mic on your keyboard and let 'er rip..."></textarea>
+  <textarea id="inp" placeholder="Tap the big green mic and let 'er rip..."></textarea>
+  <button class="mic" id="btnMic" type="button"><span class="mic-ico">🎤</span><span id="micLbl">Tap to talk</span></button>
+  <div class="mic-note" id="micNote"></div>
 
   <div class="row">
     <button class="btn-co" id="btnCo">😇 Coworker Safe</button>
@@ -138,7 +150,8 @@
   </div>
 
   <footer>
-    Everything stays on this phone. Nothing you type is sent anywhere.<br>
+    The cleanup happens on this phone and nothing you type is saved anywhere else.<br>
+    The mic button uses your phone's own speech-to-text, same as the keyboard mic.<br>
     <a href="#" id="resetJar">Empty the jar</a>
   </footer>
 </div>
@@ -404,9 +417,75 @@ function toast(msg) {
   setTimeout(() => t.classList.remove("show"), 1400);
 }
 
+// ---------- Big mic button ----------
+// Listens without opening the keyboard. Keeps going through pauses until tapped again.
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, listening = false, committed = "";
+
+function micUI(on, note) {
+  $("btnMic").classList.toggle("listening", on);
+  $("micLbl").textContent = on ? "Listening… tap to stop" : "Tap to talk";
+  if (note !== undefined) $("micNote").textContent = note;
+}
+
+function addSentence(base, piece) {
+  piece = piece.trim();
+  if (!piece) return base;
+  piece = piece[0].toUpperCase() + piece.slice(1);
+  if (!/[.!?]$/.test(piece)) piece += ".";
+  return (base ? base.trim() + " " : "") + piece;
+}
+
+function startListening() {
+  rec = new SR();
+  rec.lang = "en-US";
+  rec.interimResults = true;
+  rec.continuous = false;   // restart after each phrase: steadier on Android than continuous mode
+  rec.onresult = e => {
+    let interim = "";
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const r = e.results[i];
+      if (r.isFinal) committed = addSentence(committed, r[0].transcript);
+      else interim += r[0].transcript;
+    }
+    $("inp").value = committed + (interim ? (committed ? " " : "") + interim : "");
+  };
+  rec.onerror = e => {
+    if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+      listening = false;
+      micUI(false, "The page needs mic permission. Tap the lock or ⓘ next to the web address and allow the microphone.");
+    } else if (e.error === "network") {
+      listening = false;
+      micUI(false, "Speech-to-text needs an internet connection.");
+    }
+    // "no-speech" and "aborted" just fall through to onend and restart
+  };
+  rec.onend = () => {
+    if (listening) { try { rec.start(); } catch { listening = false; micUI(false); } }
+    else { $("inp").value = committed; micUI(false); }
+  };
+  rec.start();
+}
+
+if (!SR) {
+  $("btnMic").style.display = "none";
+  $("micNote").textContent = "Tip: tap the box and use the mic on your keyboard.";
+} else {
+  $("btnMic").onclick = () => {
+    if (listening) { listening = false; rec && rec.stop(); return; }
+    committed = $("inp").value.trim();
+    listening = true;
+    micUI(true, "Talk away. Pauses are fine.");
+    try { startListening(); } catch { listening = false; micUI(false, "Couldn't start the mic. Try again."); }
+  };
+}
+
 $("btnCo").onclick = () => run("co");
 $("btnPr").onclick = () => run("pr");
-$("btnClear").onclick = () => { $("inp").value = ""; $("result").style.display = "none"; $("inp").focus(); };
+$("btnClear").onclick = () => {
+  if (listening) { listening = false; rec && rec.stop(); }
+  committed = ""; $("inp").value = ""; $("result").style.display = "none";
+};
 $("btnSample").onclick = () => {
   $("inp").value = "This damn copier ate my fucking tests again and the principal is being such a little bitch about it. What the hell, I'm so pissed off lol";
 };
