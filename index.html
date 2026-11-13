@@ -340,9 +340,13 @@ function setJar(v) {
 }
 function addJar(n) { setJar(getJar() + n); }
 
+// Remember the last message charged, even after a refresh, so it's never charged twice.
+let memLast = "";
+function getLast() { try { return localStorage.getItem("swearJarLast") || ""; } catch { return memLast; } }
+function setLast(t) { memLast = t; try { localStorage.setItem("swearJarLast", t); } catch {} }
+
 // ---------- UI ----------
 const $ = id => document.getElementById(id);
-let lastCounted = "";
 
 function run(mode) {
   const raw = $("inp").value.trim();
@@ -353,7 +357,7 @@ function run(mode) {
   const after = tally(cleaned);
 
   // Only charge the jar once per message, no matter how many buttons get tapped
-  if (text !== lastCounted && before.cost > 0) { addJar(before.cost); lastCounted = text; }
+  if (text !== getLast() && before.cost > 0) { addJar(before.cost); setLast(text); }
 
   $("spiceBefore").textContent = peppers(before.count);
   $("spiceAfter").textContent = peppers(after.count);
@@ -365,7 +369,7 @@ function run(mode) {
   $("out").value = cleaned;
 
   const flags = headsUp(text);
-  $("flags").innerHTML = flags.map(f => `<div class="flag">⚠️ ${f}</div>`).join("");
+  $("flags").innerHTML = flags.map(f => `<div class="flag">${f.startsWith("🛑") ? "" : "⚠️ "}${f}</div>`).join("");
   $("result").style.display = "block";
   $("result").scrollIntoView({ behavior: "smooth", block: "start" });
 }
