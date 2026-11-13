@@ -155,6 +155,7 @@ const NAME = "(?:cunts?|bitch(?:es)?|assholes?|dicks?|pricks?|twats?)";
 
 const SWAPS = [
   // Phrases first (learned from her real messages)
+  ["(through|in|into|on|over|across) (the|this|that|some) ~(?:shit|crap)", "$1 $2 mess", "$1 $2 mess"],
   ["you little ~(?:cocksuckers?|shits?|bastards?|fuckers?|cunts?|assholes?|bitch(?:es)?|pricks?|dicks?)", "you little rascal", ""],
   ["kick your (?:little |sorry |lazy |dumb |fat )*(?:shit ?|dumb ?|lazy ?|fat ?)?(?:ass|butt|behind) out", "kick your little behind out", "send you out"],
   ["kick (his|her|their) (?:little |sorry |lazy |dumb |fat )*(?:shit ?|dumb ?|lazy ?|fat ?)?(?:ass|butt|behind)(?:es)? out", "kick $1 little behind out", "send them out"],
@@ -179,7 +180,12 @@ const SWAPS = [
   ["holy (?:shit|fuck|crap|hell)",                   "holy cow",                     "wow"],
   ["sons? of a (?:bitch|bitches)",                   "son of a biscuit",             "so frustrating"],
   ["pain in (the|my) (?:ass|butt)",                  "pain in $1 neck",              "real challenge"],
-  ["in the (?:nuts|balls)",                          "in the shins",                 "in the shins"],
+  ["in the (?:nuts|balls|twat|cunt|pussy|crotch|dick|junk|tits|boobs)", "in the shins", "in the shins"],
+  ["(?:tits|titties|boobs)",                         "teeth",                        "teeth"],
+  ["pissing (\\w+) off",                             "driving $1 nuts",              "frustrating $1"],
+  ["piss (\\w+) off",                                "drive $1 nuts",                "frustrate $1"],
+  ["pisses (\\w+) off",                              "drives $1 nuts",               "frustrates $1"],
+  ["pissed (me|her|him|them|us|you) off",            "drove $1 nuts",                "frustrated $1"],
   ["kick(s|ed|ing)? ass",                            "kick$1 butt",                  "kick$1 butt"],
   ["half[- ]assed",                                  "half-baked",                   "incomplete"],
   ["bad[- ]?ass",                                    "awesome",                      "impressive"],
@@ -233,7 +239,7 @@ const COMPILED = SWAPS.map(([p, co, pr]) => [
 // Voice typing often hides swears as "G******" or "a**". We guess the real word
 // by its first letter, its length and any letters that show. Order breaks ties.
 const MASK_GUESSES = [
-  "fuck", "shit", "damn", "cunt", "hell", "dick", "crap", "piss", "twat",
+  "fuck", "shit", "damn", "cunt", "hell", "dick", "tits", "crap", "piss", "twat",
   "fucks", "shits", "bitch", "cunts", "dicks", "prick", "balls",
   "fucked", "fucker", "fuckin", "shitty", "pissed", "damned", "dammit",
   "fucking", "fuckers", "goddamn", "bastard", "bitches", "asshole", "dumbass", "jackass",
@@ -259,7 +265,7 @@ function unmask(text) {
 const PRICES = [
   [/\bcunts?\b/gi, 5.00],
   [/\b(?:mother)?fuck\w*|\beffing\b|\bcocksuck\w*/gi, 1.00],
-  [/\b(?:bull)?shit\w*|\bbitch\w*|\bbastards?\b|\b(?:dumb|jack|smart)?ass(?:holes?|es)?\b|\bdicks?\b|\bpricks?\b|\btwats?\b|\bdouche\w*|\bpiss\w*/gi, 0.50],
+  [/\b(?:bull)?shit\w*|\bbitch\w*|\btits\b|\btitties\b|\bbastards?\b|\b(?:dumb|jack|smart)?ass(?:holes?|es)?\b|\bdicks?\b|\bpricks?\b|\btwats?\b|\bdouche\w*|\bpiss\w*/gi, 0.50],
   [/\b(?:god ?)?damn\w*|\bdammit\b|\bhell\b|\bcrap\w*|\bhalf[- ]assed\b|\bbad[- ]?ass\b/gi, 0.25],
 ];
 
@@ -278,10 +284,14 @@ function peppers(n) {
 }
 
 // ---------- Heads-up checks ----------
+const ROLES = "principal|vice principal|admin|nurse|boss|superintendent|counselor|secretary|AP|janitor|custodian|teacher|coach|librarian|para|aide|office lady";
 function headsUp(text) {
   const out = [];
-  if (/\b(?:kick|kicking|punch|punching|hit|hitting|slap|slapping|smack|smacking|choke|choking|strangle|strangling|throttle|beat|beating|kill|killing|murder)\b(?!\s+off)[^.!?]{0,40}\b(?:kids?|students?|child|children|one|him|her|them)\b/i.test(text))
+  const HURT = "\\b(?:kick|kicking|punch|punching|hit|hitting|slap|slapping|smack|smacking|choke|choking|strangle|strangling|throttle|beat|beating|kill|killing|murder|stab|shoot)\\b(?!\\s+off)[^.!?]{0,40}\\b";
+  if (new RegExp(HURT + "(?:kids?|students?|child|children|one)\\b", "i").test(text))
     out.push("🛑 This sounds like hurting a kid. Even as an obvious joke, that's the kind of text that ends a teaching career if it gets screenshotted. Best not to send this one in writing at all.");
+  else if (new RegExp(HURT + "(?:him|her|them|you|" + ROLES + ")\\b", "i").test(text))
+    out.push("🛑 This sounds like wanting to hurt someone. Even as a joke, a written threat about a coworker can get you in real trouble. Best not to send this part.");
   if (/\byou (?:little |fucking |stupid |dumb )*(?:cocksuckers?|shits?|bastards?|fuckers?|cunts?|assholes?|bitch(?:es)?|pricks?|dicks?|brats?|punks?)\b/i.test(text))
     out.push("This calls someone a name to their face. If it's aimed at a student, a parent or principal seeing it would be a big problem.");
   if (/\b(?:kick|kicking|hit|hitting|beat|beating|punch|punching|smack|kill|choke|strangle)\b[^.!?]{0,20}\b(?:dog|dogs|cat|cats|pet|pets|puppy|kitten)\b/i.test(text))
@@ -292,7 +302,8 @@ function headsUp(text) {
     out.push("This mentions a sick-out or walkout. Even as a joke, that can look bad if it gets forwarded.");
   if (/\bcunts?\b/i.test(text))
     out.push("The c-word was in here. The cleaned version drops it, but double-check the meaning still reads right.");
-  if (/\b(?:principal|admin|nurse|boss|superintendent|counselor|secretary|AP)\b[^.!?]{0,40}\b(?:fuck\w*|cunts?|bitch\w*|asshole|dick|idiot|stupid|moron)/i.test(text))
+  if (new RegExp("\\b(?:" + ROLES + ")\\b[^.!?]{0,40}\\b(?:fuck\\w*|cunts?|bitch\\w*|asshole|dick|idiot|stupid|moron)", "i").test(text) ||
+      new RegExp("\\b(?:(?:mother)?fuck\\w*|goddamn\\w*|damn\\w*|shitty|stupid|bitch\\w*|dumbass)\\s+(?:" + ROLES + ")\\b", "i").test(text))
     out.push("This one goes after a coworker by their job title. Screenshots travel — is this one worth saying in writing?");
   if (/\b(?:kids|students|little)\s+(?:fucking\s+)?(?:bastards|shits|fuckers|assholes|brats|demons)/i.test(text))
     out.push("This calls students names. The cleaned version fixes it, but keep that in mind for anything going to admin or parents.");
