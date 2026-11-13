@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14213d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Swear Jar">
+<title>Swear Jar</title>
+<style>
+  :root {
+    --navy: #14213d;
+    --navy2: #1f3159;
+    --brass: #e0a526;
+    --cream: #fbf6ea;
+    --ink: #1b1b1b;
+    --red: #c0392b;
+    --green: #2e8b57;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--navy);
+    color: var(--cream);
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 16px; }
+  header { text-align: center; margin: 8px 0 14px; }
+  header h1 { margin: 0; font-size: 30px; letter-spacing: .5px; }
+  header h1 span { color: var(--brass); }
+  header p { margin: 4px 0 0; opacity: .8; font-size: 15px; }
+  label { display: block; font-weight: 700; margin: 12px 0 6px; font-size: 15px; }
+  textarea {
+    width: 100%;
+    min-height: 150px;
+    border-radius: 14px;
+    border: 2px solid var(--navy2);
+    padding: 12px;
+    font-size: 18px;
+    line-height: 1.4;
+    font-family: inherit;
+    background: var(--cream);
+    color: var(--ink);
+    resize: vertical;
+  }
+  textarea:focus { outline: none; border-color: var(--brass); }
+  .row { display: flex; gap: 10px; margin-top: 12px; }
+  .row.small { margin-top: 8px; }
+  button {
+    flex: 1;
+    border: 0;
+    border-radius: 14px;
+    padding: 14px 10px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:active { transform: scale(.97); }
+  .btn-co { background: var(--brass); color: var(--navy); }
+  .btn-pr { background: var(--cream); color: var(--navy); }
+  .btn-ghost { background: transparent; color: var(--cream); border: 2px solid var(--navy2); font-size: 14px; padding: 9px; font-weight: 600; }
+  .btn-copy { background: var(--green); color: #fff; }
+  #result { display: none; margin-top: 16px; }
+  .card {
+    background: var(--navy2);
+    border-radius: 16px;
+    padding: 14px;
+    margin-top: 12px;
+  }
+  .meters { display: flex; justify-content: space-between; gap: 10px; }
+  .meter { flex: 1; text-align: center; }
+  .meter .lbl { font-size: 13px; opacity: .8; }
+  .meter .val { font-size: 22px; min-height: 30px; }
+  .jar { text-align: center; font-size: 17px; margin-top: 10px; }
+  .jar b { color: var(--brass); font-size: 22px; }
+  .jar .total { font-size: 13px; opacity: .75; margin-top: 4px; }
+  #out { min-height: 110px; }
+  .flags { margin-top: 12px; }
+  .flag {
+    background: #3a2a10;
+    border-left: 5px solid var(--brass);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-top: 8px;
+    font-size: 15px;
+  }
+  .toast {
+    position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%);
+    background: var(--green); color: #fff; padding: 10px 18px; border-radius: 30px;
+    font-weight: 700; opacity: 0; transition: opacity .25s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+  footer { text-align: center; font-size: 12px; opacity: .6; margin: 22px 0 10px; }
+  a { color: var(--brass); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>⚓ Swear <span>Jar</span></h1>
+    <p>Sailor-to-Staff Translator</p>
+  </header>
+
+  <label for="inp">Say it how you mean it 🎤</label>
+  <textarea id="inp" placeholder="Tap the mic on your keyboard and let 'er rip..."></textarea>
+
+  <div class="row">
+    <button class="btn-co" id="btnCo">😇 Coworker Safe</button>
+    <button class="btn-pr" id="btnPr">🎩 Principal Safe</button>
+  </div>
+  <div class="row small">
+    <button class="btn-ghost" id="btnSample">Try a sample</button>
+    <button class="btn-ghost" id="btnClear">Clear</button>
+  </div>
+
+  <div id="result">
+    <div class="card">
+      <div class="meters">
+        <div class="meter"><div class="lbl">Before</div><div class="val" id="spiceBefore"></div></div>
+        <div class="meter"><div class="lbl">After</div><div class="val" id="spiceAfter"></div></div>
+      </div>
+      <div class="jar" id="jarLine"></div>
+      <div class="jar"><div class="total" id="jarTotal"></div></div>
+    </div>
+
+    <label for="out" id="outLabel">Ready to send</label>
+    <textarea id="out"></textarea>
+    <div class="row">
+      <button class="btn-copy" id="btnCopy">📋 Copy</button>
+    </div>
+    <div class="flags" id="flags"></div>
+  </div>
+
+  <footer>
+    Everything stays on this phone. Nothing you type is sent anywhere.<br>
+    <a href="#" id="resetJar">Empty the jar</a>
+  </footer>
+</div>
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+// ---------- Swap list ----------
+// Each entry: [pattern, coworker version, principal version]
+// "~" in a pattern means "an optional intensifier can sit here" (fucking, damn, etc.)
+// A version of null means "leave it as is" in that mode.
+// "$1" pulls back a captured word so grammar survives.
+const F = "(?:(?:fucking|fuckin'?|motherfucking|goddamn(?:ed)?|damn|freaking)\\s+)?";
+const NAME = "(?:cunts?|bitch(?:es)?|assholes?|dicks?|pricks?|twats?)";
+
+const SWAPS = [
+  // Phrases first (learned from her real messages)
+  ["being such (?:a )?(?:little )?~" + NAME,       "being such a pain",            "being difficult"],
+  ["(is|are|was|were) (?:such )?(?:a )?(?:little )?~" + NAME, "$1 really something", "$1 being difficult"],
+  ["(?:little )~(?:bastards|shits|fuckers|assholes)", "little darlings",          "students"],
+  ["stupid ~pass(es)?",                              "blessed pass$1",               "pass$1"],
+  ["every ~plague",                                  "every plague known to science","every illness"],
+
+  // Common phrases
+  ["shut the fuck up",                               "zip it",                       "please stop"],
+  ["what the (?:fuck|hell|shit)",                    "what the heck",                "what on earth"],
+  ["the (?:fuck|hell) (?:out of|outta)",             "the heck out of",              ""],
+  ["fuck (it|this|that)",                            "forget $1",                    "forget $1"],
+  ["fuck (?:you|off)",                               "bless your heart",             "no thank you"],
+  ["give a ~(?:shit|fuck|damn|crap|rat'?s ass)",     "give a hoot",                  "care"],
+  ["(?:fucked|screwed) up",                          "messed up",                    "not right"],
+  ["pissed off",                                     "steamed",                      "frustrated"],
+  ["piece of (?:shit|crap)",                         "piece of junk",                "problem"],
+  ["holy (?:shit|fuck|crap|hell)",                   "holy cow",                     "wow"],
+  ["sons? of a (?:bitch|bitches)",                   "son of a biscuit",             "so frustrating"],
+  ["pain in the (?:ass|butt)",                       "pain in the neck",             "real challenge"],
+  ["kick(s|ed|ing)? ass",                            "kick$1 butt",                  "kick$1 butt"],
+  ["half[- ]assed",                                  "half-baked",                   "incomplete"],
+  ["bad[- ]?ass",                                    "awesome",                      "impressive"],
+  ["(?:god ?)?damn ?it|dammit",                      "darn it",                      ""],
+  ["bull ?shit",                                     "baloney",                      "nonsense"],
+
+  // Single words
+  ["(?:dumb|jack|smart)ass(?:es)?",                  "goofball",                     "person"],
+  ["assholes",                                       "pills",                        "difficult people"],
+  ["asshole",                                        "pill",                         "difficult person"],
+  ["motherfuckers",                                  "mother truckers",              "people"],
+  ["motherfucker",                                   "mother trucker",               "person"],
+  ["fuckers",                                        "turkeys",                      "people"],
+  ["fucker",                                         "turkey",                       "person"],
+  ["bitching",                                       "griping",                      "complaining"],
+  ["bitches",                                        "pills",                        "people"],
+  ["bitch",                                          "pill",                         "person"],
+  ["bastards",                                       "rascals",                      "people"],
+  ["bastard",                                        "rascal",                       "person"],
+  ["cunts",                                          "pains",                        "people"],
+  ["cunt",                                           "real treat",                   "person"],
+  ["(?:dick|prick|twat|douche(?:bag)?)s",            "jerks",                        "people"],
+  ["dick|prick|twat|douche(?:bag)?",                 "jerk",                         "person"],
+  ["shitty",                                         "crummy",                       "poor"],
+  ["shits?",                                         "stuff",                        "stuff"],
+  ["motherfucking|fucking|fuckin'?|effing",          "__INTENS__",                   ""],
+  ["fucked",                                         "toast",                        "in trouble"],
+  ["fucks?",                                         "fudge",                        ""],
+  ["goddamn(?:ed)?",                                 "gosh-darn",                    ""],
+  ["damn(?:ed)?",                                    "dang",                         ""],
+  ["hell",                                           "heck",                         "heck"],
+  ["crappy",                                         "crummy",                       "poor"],
+  ["crap",                                           "crud",                         "junk"],
+  ["ass",                                            "butt",                         "behind"],
+  ["pissed",                                         "steamed",                      "frustrated"],
+
+  // Principal mode only: tidy up the texting voice
+  ["lol|lmao|lmfao|rofl",                            null,                           ""],
+  ["gonna",                                          null,                           "going to"],
+  ["wanna",                                          null,                           "want to"],
+  ["gotta",                                          null,                           "have to"],
+];
+
+const COMPILED = SWAPS.map(([p, co, pr]) => [
+  new RegExp("\\b(?:" + p.replace(/~/g, F) + ")\\b", "gi"), co, pr
+]);
+
+// ---------- Swear jar prices ----------
+const PRICES = [
+  [/\bcunts?\b/gi, 5.00],
+  [/\b(?:mother)?fuck\w*|\beffing\b/gi, 1.00],
+  [/\b(?:bull)?shit\w*|\bbitch\w*|\bbastards?\b|\b(?:dumb|jack|smart)?ass(?:holes?|es)?\b|\bdicks?\b|\bpricks?\b|\btwats?\b|\bdouche\w*|\bpiss\w*/gi, 0.50],
+  [/\b(?:god ?)?damn\w*|\bdammit\b|\bhell\b|\bcrap\w*|\bhalf[- ]assed\b|\bbad[- ]?ass\b/gi, 0.25],
+];
+
+function tally(text) {
+  let count = 0, cost = 0;
+  for (const [re, price] of PRICES) {
+    const m = text.match(re);
+    if (m) { count += m.length; cost += m.length * price; }
+  }
+  return { count, cost };
+}
+
+function peppers(n) {
+  const level = n === 0 ? 0 : n <= 2 ? 1 : n <= 4 ? 2 : n <= 7 ? 3 : n <= 11 ? 4 : 5;
+  return level === 0 ? "😇 clean" : "🌶️".repeat(level);
+}
+
+// ---------- Heads-up checks ----------
+function headsUp(text) {
+  const out = [];
+  if (/\bsick[- ]?out\b|\bwalk[- ]?out\b|\bstrike\b|\ball call(?:ing)? in\b/i.test(text))
+    out.push("This mentions a sick-out or walkout. Even as a joke, that can look bad if it gets forwarded.");
+  if (/\bcunts?\b/i.test(text))
+    out.push("The c-word was in here. The cleaned version drops it, but double-check the meaning still reads right.");
+  if (/\b(?:principal|admin|nurse|boss|superintendent|counselor|secretary|AP)\b[^.!?]{0,40}\b(?:fuck\w*|cunts?|bitch\w*|asshole|dick|idiot|stupid|moron)/i.test(text))
+    out.push("This one goes after a coworker by their job title. Screenshots travel — is this one worth saying in writing?");
+  if (/\b(?:kids|students|little)\s+(?:fucking\s+)?(?:bastards|shits|fuckers|assholes|brats|demons)/i.test(text))
+    out.push("This calls students names. The cleaned version fixes it, but keep that in mind for anything going to admin or parents.");
+  return out;
+}
+
+// ---------- Translator ----------
+function matchCase(original, rep) {
+  if (!rep) return rep;
+  if (/[A-Z]{2}/.test(original) && original === original.toUpperCase()) return rep.toUpperCase();
+  if (/^[A-Z]/.test(original)) return rep[0].toUpperCase() + rep.slice(1);
+  return rep;
+}
+
+function translate(text, mode) {
+  let out = text;
+  let intensUsed = false;
+  for (const [re, co, pr] of COMPILED) {
+    const rep = mode === "co" ? co : pr;
+    if (rep === null) continue;
+    out = out.replace(re, (...args) => {
+      const m = args[0];
+      if (rep === "__INTENS__") {
+        // Coworker mode keeps one "freaking" for flavor and drops the rest
+        if (!intensUsed) { intensUsed = true; return matchCase(m, "freaking"); }
+        return "";
+      }
+      const filled = rep.replace(/\$(\d)/g, (_, n) => (typeof args[+n] === "string" ? args[+n] : ""));
+      return matchCase(m, filled);
+    });
+  }
+  return tidy(out);
+}
+
+function tidy(s) {
+  return s
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/ +([,.!?;:])/g, "$1")
+    .replace(/,\s*([.!?])/g, "$1")
+    .replace(/([,;:])\1+/g, "$1")
+    .replace(/(^|\n)\s*[,.;:]\s*/g, "$1")
+    .replace(/\b(a|the) \1\b/gi, "$1")
+    .replace(/\ban ([b-df-hj-np-tv-z])/g, "a $1")
+    .replace(/\ba ([aeiou])/g, "an $1")
+    .replace(/(^|[.!?]\s+|\n)([a-z])/g, (_, a, b) => a + b.toUpperCase())
+    .replace(/\bi\b/g, "I")
+    .trim();
+}
+
+// ---------- Jar total (stored only on this phone) ----------
+// If the phone blocks storage (private browsing), the jar still works for this visit.
+let memJar = 0;
+function getJar() {
+  try { return parseFloat(localStorage.getItem("swearJarTotal") || "0"); } catch { return memJar; }
+}
+function setJar(v) {
+  memJar = v;
+  try { localStorage.setItem("swearJarTotal", v.toFixed(2)); } catch {}
+}
+function addJar(n) { setJar(getJar() + n); }
+
+// ---------- UI ----------
+const $ = id => document.getElementById(id);
+let lastCounted = "";
+
+function run(mode) {
+  const text = $("inp").value.trim();
+  if (!text) { $("inp").focus(); return; }
+  const before = tally(text);
+  const cleaned = translate(text, mode);
+  const after = tally(cleaned);
+
+  // Only charge the jar once per message, no matter how many buttons get tapped
+  if (text !== lastCounted && before.cost > 0) { addJar(before.cost); lastCounted = text; }
+
+  $("spiceBefore").textContent = peppers(before.count);
+  $("spiceAfter").textContent = peppers(after.count);
+  $("jarLine").innerHTML = before.count === 0
+    ? "Squeaky clean. The jar stays hungry. 🫙"
+    : `That one would've cost <b>$${before.cost.toFixed(2)}</b> 🫙 (${before.count} word${before.count === 1 ? "" : "s"})`;
+  $("jarTotal").textContent = `Jar total so far: $${getJar().toFixed(2)}`;
+  $("outLabel").textContent = mode === "co" ? "😇 Coworker Safe — ready to send" : "🎩 Principal Safe — ready to send";
+  $("out").value = cleaned;
+
+  const flags = headsUp(text);
+  $("flags").innerHTML = flags.map(f => `<div class="flag">⚠️ ${f}</div>`).join("");
+  $("result").style.display = "block";
+  $("result").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 1400);
+}
+
+$("btnCo").onclick = () => run("co");
+$("btnPr").onclick = () => run("pr");
+$("btnClear").onclick = () => { $("inp").value = ""; $("result").style.display = "none"; $("inp").focus(); };
+$("btnSample").onclick = () => {
+  $("inp").value = "This damn copier ate my fucking tests again and the principal is being such a little bitch about it. What the hell, I'm so pissed off lol";
+};
+$("btnCopy").onclick = async () => {
+  const text = $("out").value;
+  try { await navigator.clipboard.writeText(text); }
+  catch { $("out").select(); document.execCommand("copy"); }
+  toast("Copied! Paste it into your text.");
+};
+$("resetJar").onclick = e => {
+  e.preventDefault();
+  if (confirm("Empty the swear jar back to $0?")) { setJar(0); toast("Jar emptied"); $("jarTotal").textContent = "Jar total so far: $0.00"; }
+};
+</script>
+</body>
+</html>
