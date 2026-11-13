@@ -154,7 +154,7 @@
     The cleanup happens on this phone and nothing you type is saved anywhere else.<br>
     The mic button uses your phone's own speech-to-text, same as the keyboard mic.<br>
     <a href="#" id="resetJar">Empty the jar</a><br>
-    <span class="ver">Version 2.0 · Nov 13</span>
+    <span class="ver">Version 2.1 · Nov 13</span>
   </footer>
 </div>
 <div class="toast" id="toast">Copied!</div>
@@ -189,7 +189,8 @@ const SWAPS = [
   ["fuck (it|this|that)",                            "forget $1",                    "forget $1"],
   ["fuck (?:you|off)",                               "bless your heart",             "no thank you"],
   ["give a ~(?:shit|fuck|damn|crap|rat'?s ass)",     "give a hoot",                  "care"],
-  ["(?:fucked|screwed) up",                          "messed up",                    "not right"],
+  ["(is|was|are|were|so|totally|really|all|be) (?:fucked|screwed) up", "$1 messed up", "$1 not right"],
+  ["(?:fucked|screwed) up",                          "messed up",                    "messed up"],
   ["pissed off",                                     "steamed",                      "frustrated"],
   ["(is|was|are|were) (?:total |complete |such )?(?:shit|crap|garbage)", "$1 junk",     "$1 not working"],
   ["piece of (?:shit|crap)",                         "piece of junk",                "problem"],
@@ -212,7 +213,59 @@ const SWAPS = [
   ["(?:god ?)?damn ?it|dammit",                      "darn it",                      ""],
   ["bull ?shit",                                     "baloney",                      "nonsense"],
 
+  // Bigger phrase list (added from a general sweep, not her messages)
+  ["go fuck yourself|get fucked|fuck yourself|eat shit|kiss my (?:ass|butt)|suck my (?:dick|balls)|blow me|suck it|up yours|bite me", "go jump in a lake", "no thank you"],
+  ["screw you",                                      "bless your heart",             "no thank you"],
+  ["screw (it|this|that)",                           "forget $1",                    "forget $1"],
+  ["for fuck'?s sake|ffs",                           "for Pete's sake",              "honestly"],
+  ["(?:fuck|hell) (?:yeah|yes)",                     "heck yeah",                    "yes"],
+  ["(?:fuck|hell) no",                               "heck no",                      "no"],
+  ["no shit",                                        "no kidding",                   "certainly"],
+  ["shit happens",                                   "stuff happens",                "things happen"],
+  ["(scared|bored) shitless",                        "$1 silly",                     "very $1"],
+  ["fuck(ed|ing)? around",                           "mess$1 around",                "mess$1 around"],
+  ["fucking up",                                     "messing up",                   "messing up"],
+  ["fucks up",                                       "messes up",                    "messes up"],
+  ["fuck up",                                        "mess up",                      "mess up"],
+  ["fuck[- ]?ups",                                   "mess-ups",                     "mistakes"],
+  ["fuck[- ]?up",                                    "mess-up",                      "mistake"],
+  ["(?:get the fuck out|gtfo) of",                   "get out of",                   "please leave"],
+  ["get the fuck out|gtfo",                          "get outta here",               "please leave"],
+  ["stfu",                                           "zip it",                       "please stop talking"],
+  ["(tired|mad|pissed|annoyed|done|sick|hot|cold|busy|crazy|weird|stressed|exhausted|hungry|bored|broke|grumpy|cranky|over it) af", "$1 as heck", "$1"],
+  ["(?:shit|hell)hole (school|building|room|classroom|town|job|office)", "dump of a $1", "run-down $1"],
+  ["wtf",                                            "what the heck",                "what on earth"],
+  ["omfg",                                           "oh my gosh",                   "oh my goodness"],
+  ["fml",                                            "ugh",                          "sigh"],
+  ["clusterfuck",                                    "train wreck",                  "disaster"],
+  ["mindfuck",                                       "head-scratcher",               "confusing situation"],
+  ["fuckery",                                        "shenanigans",                  "nonsense"],
+  ["(?:fuck|shit|crap) ?(?:loads?|tons?)",           "boatload",                     "large amount"],
+  ["jack ?shit",                                     "squat",                        "nothing"],
+  ["ape ?shit",                                      "bananas",                      "very upset"],
+  ["dick move",                                      "jerk move",                    "unkind thing to do"],
+  ["piss[- ]poor",                                   "pitiful",                      "poor"],
+  ["shit[- ]?faced",                                 "plastered",                    "intoxicated"],
+  ["bloody hell",                                    "good grief",                   "good grief"],
+  ["tak(e|es|ing) a piss",                           "tak$1 a bathroom break",       "tak$1 a bathroom break"],
+  ["(?:shit|hell)holes?",                            "dump",                         "run-down place"],
+  ["retarded",                                       "ridiculous",                   "unreasonable"],
+  ["retards",                                        "goofballs",                    "people"],
+  ["retard",                                         "goofball",                     "person"],
+  ["niggers?|niggas?|faggots?|fags?",                "",                             ""],
+
   // Single words
+  ["(?:fuckface|fuckhead|fuckwit|shitbag|dickhead|dickwad|douchebag|wanker|tosser|arsehole|assclown|fatass|lardass|wiseass|kissass)s", "goofballs", "difficult people"],
+  ["fuckface|fuckhead|fuckwit|shitbag|dickhead|dickwad|douchebag|wanker|tosser|arsehole|assclown|fatass|lardass|wiseass|kissass", "goofball", "difficult person"],
+  ["pissy",                                          "grumpy",                       "irritable"],
+  ["bitchy",                                         "cranky",                       "unpleasant"],
+  ["bitched",                                        "griped",                       "complained"],
+  ["douchey",                                        "jerky",                        "rude"],
+  ["bollocks",                                       "hogwash",                      "nonsense"],
+  ["arse",                                           "butt",                         "behind"],
+  ["pussy",                                          "wimp",                         "pushover"],
+  ["cock",                                           "jerk",                         "person"],
+  ["goddammit",                                      "darn it",                      ""],
   ["(?:dumb|jack|smart)ass(?:es)?|dipshits?|shitheads?|asshats?|asswipes?", "goofball", "difficult person"],
   ["horseshit|chickenshit",                          "hogwash",                      "nonsense"],
   ["shitshow",                                       "circus",                       "mess"],
@@ -248,6 +301,8 @@ const SWAPS = [
   ["crap",                                           "crud",                         "nonsense"],
   ["ass",                                            "butt",                         "behind"],
   ["pissed",                                         "steamed",                      "frustrated"],
+  ["pissing",                                        "peeing",                       "urinating"],
+  ["piss",                                           "pee",                          "pee"],
 
   // Principal mode only: tidy up the texting voice
   ["lol|lmao|lmfao|rofl",                            null,                           ""],
@@ -272,6 +327,9 @@ const MASK_GUESSES = [
   "goddamned", "goddammit", "cocksucker", "cocksuckers",
   "motherfucker", "motherfucking", "motherfuckers",
   "ass",
+  // added later; kept at the end so earlier guesses don't change
+  "pissing", "bitchy", "shithead", "shithole", "dickhead", "douchebag", "retarded", "retard",
+  "dipshit", "fuckface", "fuckhead", "nigger", "niggers", "faggot", "pussy",
 ];
 
 function unmask(text) {
@@ -286,7 +344,13 @@ function unmask(text) {
     if (!hit) return tok;
     return /^[A-Z]/.test(tok) ? hit[0].toUpperCase() + hit.slice(1) : hit;
   });
-  return joinSplits(text);
+  return protectNames(joinSplits(text));
+}
+
+// Names like "Moby Dick" or "Dick's Sporting Goods": a capital Dick in the middle of a
+// sentence is a name. An invisible marker keeps it from being treated as a swear.
+function protectNames(text) {
+  return text.replace(/([A-Za-z,] )Dick\b/g, "$1D​ick");
 }
 
 // Voice typing often splits one swear into two words ("bat shit", "god damn").
@@ -307,11 +371,13 @@ function joinSplits(text) {
 
 
 // ---------- Swear jar prices ----------
+// Every form is spelled out so normal words ("crappie", "Shitake", "Pissarro") are never charged.
 const PRICES = [
-  [/\bcunts?\b/gi, 5.00],
-  [/\b(?:mother)?fuck\w*|\beffing\b|\bcocksuck\w*/gi, 1.00],
-  [/\b(?:bull|bat|dip|horse|chicken)?shit\w*|\bass(?:hat|wipe)s?\b|\b(?:hard|kick)ass\b|\bbitch\w*|\btits\b|\btitties\b|\bbastards?\b|\b(?:dumb|jack|smart)?ass(?:holes?|es)?\b|\bdicks?\b|\bpricks?\b|\btwats?\b|\bdouche\w*|\bpiss\w*/gi, 0.50],
-  [/\b(?:god ?)?damn\w*|\bdammit\b|\bhell\b|\bcrap\w*|\bhalf[- ]assed\b|\bbad[- ]?ass\b/gi, 0.25],
+  [/\b(?:cunts?|niggers?|niggas?|faggots?|fags?)\b/gi, 5.00],
+  [/\bretard(?:s|ed)?\b/gi, 2.00],
+  [/\b(?:mother|cluster|mind)?fuck(?:s|ed|er|ers|ing|in|face|faces|head|heads|wit|wits|up|ups|ery|loads?|tons?)?\b|\beffing\b|\bcocksuck(?:er|ers|ing)\b|\b(?:wtf|stfu|gtfo|omfg|ffs|fml)\b/gi, 1.00],
+  [/\b(?:bull|bat|dip|horse|chicken|ape|jack)?shit(?:s|ty|head|heads|hole|holes|loads?|tons?|show|storm|faced|bag|bags|less)?\b|\b(?:dumb|jack|smart|bad|hard|kick|fat|lard|wise|kiss)?ass(?:es|hole|holes|hat|hats|wipe|wipes|clown|clowns)?\b|\barse(?:hole|holes)?\b|\bbitch(?:es|ing|ed|y)?\b|\bbastards?\b|\bdick(?:s|head|heads|wad|wads)?\b|\bpricks?\b|\btwats?\b|\bdouche(?:bag|bags|y)?\b|\bpiss(?:ed|es|ing|y)?\b|\btit(?:s|ties)\b|\bpussy\b|\bcock\b|\bwankers?\b|\btossers?\b|\bbollocks\b/gi, 0.50],
+  [/\b(?:god ?)?damn(?:ed|it)?\b|\bgoddammit\b|\bdammit\b|\bhell(?:hole|holes)?\b|\bcrap(?:py|s|loads?)?\b|\bhalf[- ]assed\b/gi, 0.25],
 ];
 
 function tally(text) {
@@ -345,6 +411,10 @@ function headsUp(text) {
     out.push("💙 Sounds like a rough day. Maybe call a friend instead of texting it — and it's OK to ask for help.");
   if (/\bsick[- ]?out\b|\bwalk[- ]?out\b|\bstrike\b|\ball call(?:ing)? in\b/i.test(text))
     out.push("This mentions a sick-out or walkout. Even as a joke, that can look bad if it gets forwarded.");
+  if (/\b(?:niggers?|niggas?|faggots?|fags?)\b/i.test(text))
+    out.push("🛑 That word is a slur. It's been taken out, and it should never go in a text — especially from school.");
+  if (/\bretard(?:s|ed)?\b/i.test(text))
+    out.push("\"Retarded\" is a slur about people with disabilities. In a school, that word alone can get you written up.");
   if (/\bcunts?\b/i.test(text))
     out.push("The c-word was in here. The cleaned version drops it, but double-check the meaning still reads right.");
   if (new RegExp("\\b(?:" + ROLES + ")\\b[^.!?]{0,40}\\b(?:fuck\\w*|cunts?|bitch\\w*|asshole|dick|idiot|stupid|moron|batshit|cocksucker)", "i").test(text) ||
