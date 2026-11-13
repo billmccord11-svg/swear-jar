@@ -209,7 +209,12 @@ const SWAPS = [
   ["bull ?shit",                                     "baloney",                      "nonsense"],
 
   // Single words
-  ["(?:dumb|jack|smart)ass(?:es)?",                  "goofball",                     "person"],
+  ["(?:dumb|jack|smart)ass(?:es)?|dipshits?|shitheads?|asshats?|asswipes?", "goofball", "difficult person"],
+  ["horseshit|chickenshit",                          "hogwash",                      "nonsense"],
+  ["shitshow",                                       "circus",                       "mess"],
+  ["shitstorm",                                      "hurricane",                    "mess"],
+  ["hardass",                                        "tough cookie",                 "strict person"],
+  ["kickass",                                        "awesome",                      "excellent"],
   ["assholes",                                       "pills",                        "difficult people"],
   ["asshole",                                        "pill",                         "difficult person"],
   ["cocksuckers",                                    "rascals",                      "people"],
@@ -268,20 +273,38 @@ const MASK_GUESSES = [
 function unmask(text) {
   // Two-word masks that only make sense together ("c*** s*****")
   text = text.replace(/\b([Cc])\*{3}[ -]?s\*{5}(\*?)(?![\w*])/g, (_, c, plural) => c + "ocksucker" + (plural ? "s" : ""));
-  return text.replace(/[A-Za-z]*\*+[A-Za-z*]*/g, tok => {
+  text = text.replace(/[A-Za-z]*\*+[A-Za-z*]*/g, tok => {
     const t = tok.toLowerCase();
     const hit = MASK_GUESSES.find(w =>
       w.length === t.length && [...t].every((c, i) => c === "*" || c === w[i]));
     if (!hit) return tok;
     return /^[A-Z]/.test(tok) ? hit[0].toUpperCase() + hit.slice(1) : hit;
   });
+  return joinSplits(text);
 }
+
+// Voice typing often splits one swear into two words ("bat shit", "god damn").
+// Join them back so they're handled like the one-word version.
+const SPLITS = [
+  [/\b(bat|bull|dip|horse|chicken) shit/gi, "$1shit"],
+  [/\bshit (head|heads|show|storm|faced)\b/gi, "shit$1"],
+  [/\bgod damn(ed|it)?\b/gi, "goddamn$1"],
+  [/\bmother fuck(er|ers|ing|in)?\b/gi, "motherfuck$1"],
+  [/\bcock suck(er|ers|ing)\b/gi, "cocksuck$1"],
+  [/\b(dumb|jack|smart|bad|hard|kick) ass(es)?\b/gi, "$1ass$2"],
+  [/\bass (hole|holes|hat|hats|wipe)\b/gi, "ass$1"],
+];
+function joinSplits(text) {
+  for (const [re, rep] of SPLITS) text = text.replace(re, rep);
+  return text;
+}
+
 
 // ---------- Swear jar prices ----------
 const PRICES = [
   [/\bcunts?\b/gi, 5.00],
   [/\b(?:mother)?fuck\w*|\beffing\b|\bcocksuck\w*/gi, 1.00],
-  [/\b(?:bull|bat)?shit\w*|\bbitch\w*|\btits\b|\btitties\b|\bbastards?\b|\b(?:dumb|jack|smart)?ass(?:holes?|es)?\b|\bdicks?\b|\bpricks?\b|\btwats?\b|\bdouche\w*|\bpiss\w*/gi, 0.50],
+  [/\b(?:bull|bat|dip|horse|chicken)?shit\w*|\bass(?:hat|wipe)s?\b|\b(?:hard|kick)ass\b|\bbitch\w*|\btits\b|\btitties\b|\bbastards?\b|\b(?:dumb|jack|smart)?ass(?:holes?|es)?\b|\bdicks?\b|\bpricks?\b|\btwats?\b|\bdouche\w*|\bpiss\w*/gi, 0.50],
   [/\b(?:god ?)?damn\w*|\bdammit\b|\bhell\b|\bcrap\w*|\bhalf[- ]assed\b|\bbad[- ]?ass\b/gi, 0.25],
 ];
 
@@ -361,6 +384,7 @@ function tidy(s) {
     .replace(/,\s*([.!?])/g, "$1")
     .replace(/([,;:])\1+/g, "$1")
     .replace(/(^|\n)\s*[,.;:]\s*/g, "$1")
+    .replace(/([.!?])\s*[,;:]+\s*/g, "$1 ")
     .replace(/\b(a|the) \1\b/gi, "$1")
     .replace(/\ban ([b-df-hj-np-tv-z])/g, "a $1")
     .replace(/\ba ([aeiou])/g, "an $1")
