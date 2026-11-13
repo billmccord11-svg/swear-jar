@@ -167,10 +167,12 @@ const SWAPS = [
   ["give a ~(?:shit|fuck|damn|crap|rat'?s ass)",     "give a hoot",                  "care"],
   ["(?:fucked|screwed) up",                          "messed up",                    "not right"],
   ["pissed off",                                     "steamed",                      "frustrated"],
+  ["(is|was|are|were) (?:total |complete |such )?(?:shit|crap|garbage)", "$1 junk",     "$1 not working"],
   ["piece of (?:shit|crap)",                         "piece of junk",                "problem"],
   ["holy (?:shit|fuck|crap|hell)",                   "holy cow",                     "wow"],
   ["sons? of a (?:bitch|bitches)",                   "son of a biscuit",             "so frustrating"],
-  ["pain in the (?:ass|butt)",                       "pain in the neck",             "real challenge"],
+  ["pain in (the|my) (?:ass|butt)",                  "pain in $1 neck",              "real challenge"],
+  ["in the (?:nuts|balls)",                          "in the shins",                 "in the shins"],
   ["kick(s|ed|ing)? ass",                            "kick$1 butt",                  "kick$1 butt"],
   ["half[- ]assed",                                  "half-baked",                   "incomplete"],
   ["bad[- ]?ass",                                    "awesome",                      "impressive"],
@@ -218,6 +220,30 @@ const COMPILED = SWAPS.map(([p, co, pr]) => [
   new RegExp("\\b(?:" + p.replace(/~/g, F) + ")\\b", "gi"), co, pr
 ]);
 
+// ---------- Starred-out words ----------
+// Voice typing often hides swears as "G******" or "a**". We guess the real word
+// by its first letter, its length and any letters that show. Order breaks ties.
+const MASK_GUESSES = [
+  "fuck", "shit", "damn", "cunt", "hell", "dick", "crap", "piss", "twat",
+  "fucks", "shits", "bitch", "cunts", "dicks", "prick", "balls",
+  "fucked", "fucker", "fuckin", "shitty", "pissed", "damned", "dammit",
+  "fucking", "fuckers", "goddamn", "bastard", "bitches", "asshole", "dumbass", "jackass",
+  "bullshit", "bitching", "bastards", "assholes",
+  "goddamned", "goddammit",
+  "motherfucker", "motherfucking", "motherfuckers",
+  "ass",
+];
+
+function unmask(text) {
+  return text.replace(/[A-Za-z]*\*+[A-Za-z*]*/g, tok => {
+    const t = tok.toLowerCase();
+    const hit = MASK_GUESSES.find(w =>
+      w.length === t.length && [...t].every((c, i) => c === "*" || c === w[i]));
+    if (!hit) return tok;
+    return /^[A-Z]/.test(tok) ? hit[0].toUpperCase() + hit.slice(1) : hit;
+  });
+}
+
 // ---------- Swear jar prices ----------
 const PRICES = [
   [/\bcunts?\b/gi, 5.00],
@@ -243,6 +269,8 @@ function peppers(n) {
 // ---------- Heads-up checks ----------
 function headsUp(text) {
   const out = [];
+  if (/\b(?:kick|kicking|punch|punching|hit|hitting|slap|slapping|smack|smacking|choke|choking|strangle|strangling|throttle|beat|beating|kill|killing|murder)\b(?!\s+off)[^.!?]{0,40}\b(?:kids?|students?|child|children|one|him|her|them)\b/i.test(text))
+    out.push("🛑 This sounds like hurting a kid. Even as an obvious joke, that's the kind of text that ends a teaching career if it gets screenshotted. Best not to send this one in writing at all.");
   if (/\bsick[- ]?out\b|\bwalk[- ]?out\b|\bstrike\b|\ball call(?:ing)? in\b/i.test(text))
     out.push("This mentions a sick-out or walkout. Even as a joke, that can look bad if it gets forwarded.");
   if (/\bcunts?\b/i.test(text))
@@ -314,8 +342,9 @@ const $ = id => document.getElementById(id);
 let lastCounted = "";
 
 function run(mode) {
-  const text = $("inp").value.trim();
-  if (!text) { $("inp").focus(); return; }
+  const raw = $("inp").value.trim();
+  if (!raw) { $("inp").focus(); return; }
+  const text = unmask(raw);
   const before = tally(text);
   const cleaned = translate(text, mode);
   const after = tally(cleaned);
