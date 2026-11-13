@@ -195,6 +195,9 @@ const SWAPS = [
   ["pain in (the|my) (?:ass|butt)",                  "pain in $1 neck",              "real challenge"],
   ["in the (?:nuts|balls|twat|cunt|pussy|crotch|dick|junk|tits|boobs)", "in the shins", "in the shins"],
   ["(?:tits|titties|boobs)",                         "teeth",                        "teeth"],
+  ["pissed (in|on|all over|into)",                   "peed $1",                      "urinated $1"],
+  ["pissing (in|on|all over|into)",                  "peeing $1",                    "urinating $1"],
+  ["batshit(?: crazy| insane)?",                     "completely bananas",           "very unreasonable"],
   ["pissing (\\w+) off",                             "driving $1 nuts",              "frustrating $1"],
   ["piss (\\w+) off",                                "drive $1 nuts",                "frustrate $1"],
   ["pisses (\\w+) off",                              "drives $1 nuts",               "frustrates $1"],
@@ -233,7 +236,7 @@ const SWAPS = [
   ["damn(?:ed)?",                                    "dang",                         ""],
   ["hell",                                           "heck",                         "heck"],
   ["crappy",                                         "crummy",                       "poor"],
-  ["crap",                                           "crud",                         "junk"],
+  ["crap",                                           "crud",                         "nonsense"],
   ["ass",                                            "butt",                         "behind"],
   ["pissed",                                         "steamed",                      "frustrated"],
 
@@ -257,7 +260,7 @@ const MASK_GUESSES = [
   "fucked", "fucker", "fuckin", "shitty", "pissed", "damned", "dammit",
   "fucking", "fuckers", "goddamn", "bastard", "bitches", "asshole", "dumbass", "jackass",
   "bullshit", "bitching", "bastards", "assholes",
-  "goddamned", "goddammit",
+  "goddamned", "goddammit", "cocksucker", "cocksuckers",
   "motherfucker", "motherfucking", "motherfuckers",
   "ass",
 ];
@@ -278,7 +281,7 @@ function unmask(text) {
 const PRICES = [
   [/\bcunts?\b/gi, 5.00],
   [/\b(?:mother)?fuck\w*|\beffing\b|\bcocksuck\w*/gi, 1.00],
-  [/\b(?:bull)?shit\w*|\bbitch\w*|\btits\b|\btitties\b|\bbastards?\b|\b(?:dumb|jack|smart)?ass(?:holes?|es)?\b|\bdicks?\b|\bpricks?\b|\btwats?\b|\bdouche\w*|\bpiss\w*/gi, 0.50],
+  [/\b(?:bull|bat)?shit\w*|\bbitch\w*|\btits\b|\btitties\b|\bbastards?\b|\b(?:dumb|jack|smart)?ass(?:holes?|es)?\b|\bdicks?\b|\bpricks?\b|\btwats?\b|\bdouche\w*|\bpiss\w*/gi, 0.50],
   [/\b(?:god ?)?damn\w*|\bdammit\b|\bhell\b|\bcrap\w*|\bhalf[- ]assed\b|\bbad[- ]?ass\b/gi, 0.25],
 ];
 
@@ -315,7 +318,7 @@ function headsUp(text) {
     out.push("This mentions a sick-out or walkout. Even as a joke, that can look bad if it gets forwarded.");
   if (/\bcunts?\b/i.test(text))
     out.push("The c-word was in here. The cleaned version drops it, but double-check the meaning still reads right.");
-  if (new RegExp("\\b(?:" + ROLES + ")\\b[^.!?]{0,40}\\b(?:fuck\\w*|cunts?|bitch\\w*|asshole|dick|idiot|stupid|moron)", "i").test(text) ||
+  if (new RegExp("\\b(?:" + ROLES + ")\\b[^.!?]{0,40}\\b(?:fuck\\w*|cunts?|bitch\\w*|asshole|dick|idiot|stupid|moron|batshit|cocksucker)", "i").test(text) ||
       new RegExp("\\b(?:(?:mother)?fuck\\w*|goddamn\\w*|damn\\w*|shitty|stupid|bitch\\w*|dumbass)\\s+(?:" + ROLES + ")\\b", "i").test(text))
     out.push("This one goes after a coworker by their job title. Screenshots travel — is this one worth saying in writing?");
   if (/\b(?:kids|students|little)\s+(?:fucking\s+)?(?:bastards|shits|fuckers|assholes|brats|demons)/i.test(text))
