@@ -155,6 +155,9 @@ const NAME = "(?:cunts?|bitch(?:es)?|assholes?|dicks?|pricks?|twats?)";
 
 const SWAPS = [
   // Phrases first (learned from her real messages)
+  ["you little ~(?:cocksuckers?|shits?|bastards?|fuckers?|cunts?|assholes?|bitch(?:es)?|pricks?|dicks?)", "you little rascal", ""],
+  ["kick your (?:little |sorry |lazy |dumb |fat )*(?:shit ?|dumb ?|lazy ?|fat ?)?(?:ass|butt|behind) out", "kick your little behind out", "send you out"],
+  ["kick (his|her|their) (?:little |sorry |lazy |dumb |fat )*(?:shit ?|dumb ?|lazy ?|fat ?)?(?:ass|butt|behind)(?:es)? out", "kick $1 little behind out", "send them out"],
   ["being such (?:a )?(?:little )?~" + NAME,       "being such a pain",            "being difficult"],
   ["(is|are|was|were) (?:such )?(?:a )?(?:little )?~" + NAME, "$1 really something", "$1 being difficult"],
   ["(?:little )~(?:bastards|shits|fuckers|assholes)", "little darlings",          "students"],
@@ -164,7 +167,7 @@ const SWAPS = [
   // Common phrases
   ["shut the fuck up",                               "zip it",                       "please stop"],
   ["what the (?:fuck|hell|shit)",                    "what the heck",                "what on earth"],
-  ["the (?:fuck|hell) (?:out of|outta)",             "the heck out of",              ""],
+  ["the (?:fuck|hell|shit|crap) (?:out of|outta)",             "the heck out of",              ""],
   ["fuck (it|this|that)",                            "forget $1",                    "forget $1"],
   ["fuck (?:you|off)",                               "bless your heart",             "no thank you"],
   ["give a ~(?:shit|fuck|damn|crap|rat'?s ass)",     "give a hoot",                  "care"],
@@ -172,6 +175,7 @@ const SWAPS = [
   ["pissed off",                                     "steamed",                      "frustrated"],
   ["(is|was|are|were) (?:total |complete |such )?(?:shit|crap|garbage)", "$1 junk",     "$1 not working"],
   ["piece of (?:shit|crap)",                         "piece of junk",                "problem"],
+  ["(the|this|that|such) ~(?:shit|crap|bullshit)",   "$1 nonsense",                  "$1 nonsense"],
   ["holy (?:shit|fuck|crap|hell)",                   "holy cow",                     "wow"],
   ["sons? of a (?:bitch|bitches)",                   "son of a biscuit",             "so frustrating"],
   ["pain in (the|my) (?:ass|butt)",                  "pain in $1 neck",              "real challenge"],
@@ -186,6 +190,8 @@ const SWAPS = [
   ["(?:dumb|jack|smart)ass(?:es)?",                  "goofball",                     "person"],
   ["assholes",                                       "pills",                        "difficult people"],
   ["asshole",                                        "pill",                         "difficult person"],
+  ["cocksuckers",                                    "rascals",                      "people"],
+  ["cocksucker",                                     "rascal",                       "person"],
   ["motherfuckers",                                  "mother truckers",              "people"],
   ["motherfucker",                                   "mother trucker",               "person"],
   ["fuckers",                                        "turkeys",                      "people"],
@@ -238,6 +244,8 @@ const MASK_GUESSES = [
 ];
 
 function unmask(text) {
+  // Two-word masks that only make sense together ("c*** s*****")
+  text = text.replace(/\b([Cc])\*{3}[ -]?s\*{5}(\*?)(?![\w*])/g, (_, c, plural) => c + "ocksucker" + (plural ? "s" : ""));
   return text.replace(/[A-Za-z]*\*+[A-Za-z*]*/g, tok => {
     const t = tok.toLowerCase();
     const hit = MASK_GUESSES.find(w =>
@@ -250,7 +258,7 @@ function unmask(text) {
 // ---------- Swear jar prices ----------
 const PRICES = [
   [/\bcunts?\b/gi, 5.00],
-  [/\b(?:mother)?fuck\w*|\beffing\b/gi, 1.00],
+  [/\b(?:mother)?fuck\w*|\beffing\b|\bcocksuck\w*/gi, 1.00],
   [/\b(?:bull)?shit\w*|\bbitch\w*|\bbastards?\b|\b(?:dumb|jack|smart)?ass(?:holes?|es)?\b|\bdicks?\b|\bpricks?\b|\btwats?\b|\bdouche\w*|\bpiss\w*/gi, 0.50],
   [/\b(?:god ?)?damn\w*|\bdammit\b|\bhell\b|\bcrap\w*|\bhalf[- ]assed\b|\bbad[- ]?ass\b/gi, 0.25],
 ];
@@ -274,6 +282,12 @@ function headsUp(text) {
   const out = [];
   if (/\b(?:kick|kicking|punch|punching|hit|hitting|slap|slapping|smack|smacking|choke|choking|strangle|strangling|throttle|beat|beating|kill|killing|murder)\b(?!\s+off)[^.!?]{0,40}\b(?:kids?|students?|child|children|one|him|her|them)\b/i.test(text))
     out.push("🛑 This sounds like hurting a kid. Even as an obvious joke, that's the kind of text that ends a teaching career if it gets screenshotted. Best not to send this one in writing at all.");
+  if (/\byou (?:little |fucking |stupid |dumb )*(?:cocksuckers?|shits?|bastards?|fuckers?|cunts?|assholes?|bitch(?:es)?|pricks?|dicks?|brats?|punks?)\b/i.test(text))
+    out.push("This calls someone a name to their face. If it's aimed at a student, a parent or principal seeing it would be a big problem.");
+  if (/\b(?:kick|kicking|hit|hitting|beat|beating|punch|punching|smack|kill|choke|strangle)\b[^.!?]{0,20}\b(?:dog|dogs|cat|cats|pet|pets|puppy|kitten)\b/i.test(text))
+    out.push("Joking about hurting an animal reads really badly in writing. Worth leaving that part out.");
+  if (/\b(?:can'?t (?:handle|take|do) (?:it|this) any ?more|don'?t know if I can (?:handle|take|do) (?:it|this)|end of my rope|ready to quit|want to quit|gonna quit)/i.test(text))
+    out.push("💙 Sounds like a rough day. Maybe call a friend instead of texting it — and it's OK to ask for help.");
   if (/\bsick[- ]?out\b|\bwalk[- ]?out\b|\bstrike\b|\ball call(?:ing)? in\b/i.test(text))
     out.push("This mentions a sick-out or walkout. Even as a joke, that can look bad if it gets forwarded.");
   if (/\bcunts?\b/i.test(text))
@@ -369,7 +383,7 @@ function run(mode) {
   $("out").value = cleaned;
 
   const flags = headsUp(text);
-  $("flags").innerHTML = flags.map(f => `<div class="flag">${f.startsWith("🛑") ? "" : "⚠️ "}${f}</div>`).join("");
+  $("flags").innerHTML = flags.map(f => `<div class="flag">${/^(🛑|💙)/u.test(f) ? "" : "⚠️ "}${f}</div>`).join("");
   $("result").style.display = "block";
   $("result").scrollIntoView({ behavior: "smooth", block: "start" });
 }
